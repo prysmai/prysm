@@ -1,0 +1,7 @@
+{
+  "name": "prysm-server",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node server.mjs", "season": "node season.mjs", "test": "node --test test/*.test.mjs" },
+  "dependencies": { "ethers": "^6.13.4" }
+}

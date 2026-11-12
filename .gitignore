@@ -1,0 +1,9 @@
+node_modules/
+contracts/artifacts/
+contracts/cache/
+contracts/deployments/localhost.json
+server/data/
+server/config.json
+.env*
+*.key
+!.env.example

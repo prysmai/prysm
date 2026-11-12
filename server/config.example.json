@@ -1,0 +1,11 @@
+{
+  "rpc": "https://rpc.mainnet.chain.robinhood.com",
+  "deployment": "../contracts/deployments/rhMainnet.json",
+  "port": 5610,
+  "site": "../site",
+  "seasonEpoch": "2026-11-16T00:00:00Z",
+  "seasonDays": 7,
+  "minSignals": 5,
+  "keeperIntervalSec": 20,
+  "publicUrl": "https://prysmagent.com"
+}

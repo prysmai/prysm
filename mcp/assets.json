@@ -1,0 +1,55 @@
+{
+ "note": "Uniswap v3 USDG pools on Robinhood Chain mainnet used as price oracles (pool + token from physarum/data/assets.json; invert = asset is token1)",
+ "usdg": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+ "assets": [
+  {
+   "id": 0,
+   "sym": "ETH",
+   "token": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+   "pool": "0x52e65B17fB6E5BA00Ed806f37Afcd2DaA50271Ca",
+   "invert": false
+  },
+  {
+   "id": 1,
+   "sym": "NVDA",
+   "token": "0xd0601CE157Db5bdC3162BbaC2a2C8aF5320D9EEC",
+   "pool": "0xd4EB21209C4D6093f80B5b84f5C45cc093EA14a3",
+   "invert": true
+  },
+  {
+   "id": 2,
+   "sym": "TSLA",
+   "token": "0x322F0929c4625eD5bAd873c95208D54E1c003b2d",
+   "pool": "0xf4ACdAEEB7022862A763C9B1B885e11191c889E3",
+   "invert": false
+  },
+  {
+   "id": 3,
+   "sym": "AAPL",
+   "token": "0xaF3D76f1834A1d425780943C99Ea8A608f8a93f9",
+   "pool": "0xAae0d815EE56e4092a5E5C2911E676Fea50B2d6D",
+   "invert": true
+  },
+  {
+   "id": 4,
+   "sym": "MSFT",
+   "token": "0xe93237C50D904957Cf27E7B1133b510C669c2e74",
+   "pool": "0xeb60bCD1D920ad6E102690CCFC6fB488899E1510",
+   "invert": true
+  },
+  {
+   "id": 5,
+   "sym": "AMZN",
+   "token": "0x12f190a9F9d7D37a250758b26824B97CE941bF54",
+   "pool": "0x8AC92DA74AB5F3b1d024Dc1943Ad7e15Dc4179Ef",
+   "invert": false
+  },
+  {
+   "id": 6,
+   "sym": "GOOGL",
+   "token": "0x2e0847E8910a9732eB3fb1bb4b70a580ADAD4FE3",
+   "pool": "0x34D0dC122CF9A8Eb296fC5e0D3A233625D7d19b7",
+   "invert": false
+  }
+ ]
+}

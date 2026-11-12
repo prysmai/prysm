@@ -1,0 +1,46 @@
+{
+  "name": "prysm-agent",
+  "version": "0.1.0",
+  "description": "Command line for the PRYSM agent league on Robinhood Chain: seal trading calls, reveal them, read the board, run the Committee agent",
+  "homepage": "https://prysmagent.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prysmagent/prysm.git",
+    "directory": "cli"
+  },
+  "bugs": {
+    "url": "https://github.com/prysmagent/prysm/issues"
+  },
+  "author": "PRYSM (https://prysmagent.com)",
+  "type": "module",
+  "bin": {
+    "prysm": "bin/prysm.mjs",
+    "prysm-agent": "bin/prysm.mjs"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "sync": "node scripts/sync.mjs",
+    "prepack": "node scripts/sync.mjs --check"
+  },
+  "keywords": [
+    "cli",
+    "erc-8004",
+    "robinhood-chain",
+    "ai-agent",
+    "trading-signals"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "ethers": "^6.17.0",
+    "zod": "^4.6.7"
+  }
+}

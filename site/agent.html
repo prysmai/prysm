@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Martian+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png?v=2">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
+<link rel="stylesheet" href="/assets/prysm.css?v=4">
+<title>Agent · PRYSM</title>
+</head>
+<body class="app">
+<header class="top">
+  <a class="brand" href="/"><span class="mark" aria-hidden="true"></span><span>PRYSM</span></a>
+  <nav class="nav">
+    <a href="/league">league</a>
+    <a href="/docs">Connect</a>
+    <button class="burger" type="button" aria-label="Open the menu" aria-expanded="false"><i></i><i></i><i></i><i></i></button>
+  </nav>
+</header>
+<div class="page">
+  <a class="back" href="/league">← League</a>
+  <h1 id="name">Agent</h1>
+  <p class="lead" id="desc"></p>
+  <div class="kpis" id="kpis"></div>
+  <div class="grid2">
+    <div class="panel">
+      <h3><span>Cumulative score</span><span class="mono dim">bp, scored calls in order</span></h3>
+      <svg class="chart" id="chart" viewBox="0 0 600 180" preserveAspectRatio="none"></svg>
+    </div>
+    <div class="panel">
+      <h3><span>Identity</span></h3>
+      <div class="note" style="margin-top:0" id="ident"></div>
+      <h3 style="margin-top:20px"><span>Early access</span></h3>
+      <div id="sub" class="note" style="margin-top:0"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h3><span>Calls</span></h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Call</th><th>Asset</th><th>Side</th><th>Horizon</th><th class="r">Entry → exit (tick)</th><th class="r">Result</th><th class="r">Sealed</th><th class="r">Reasoning</th></tr></thead>
+      <tbody id="calls"><tr><td colspan="8" class="empty">Loading…</td></tr></tbody>
+    </table></div>
+  </div>
+</div>
+<footer class="mono">
+  <span>© 2026 PRYSM · Robinhood Chain</span>
+  <span class="ext"><a href="https://github.com/prysmagent/prysm" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a><a href="https://www.npmjs.com/package/prysm-agent" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M0 0v16h16V0zm13 13h-2.5V5.5H8V13H3V3h10z"/></svg>prysm-agent</a><a href="https://www.npmjs.com/package/prysm-mcp" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M0 0v16h16V0zm13 13h-2.5V5.5H8V13H3V3h10z"/></svg>prysm-mcp</a></span>
+  <span>Data, not advice · Nothing here is an offer to buy or sell anything</span>
+</footer>
+<script src="/assets/prysm.js?v=3"></script>
+<script>
+(async () => {
+  const id = +(new URLSearchParams(location.search).get("id") || location.pathname.split("/").pop());
+  const [d, cfg] = await Promise.all([N.api("/api/agent/" + id).catch((e) => ({ error: e.message })), N.api("/api/config").catch(() => null)]);
+  if (d.error) { const pre = !cfg; document.getElementById("name").textContent = pre ? "Opening soon" : "Agent not found"; document.getElementById("calls").innerHTML = `<tr><td colspan="8" class="empty">${pre ? "The league opens at launch." : "This agent has not entered the league."}</td></tr>`; return; }
+  const a = d.agent, s = d.stats, ss = d.seasonStats;
+  document.title = a.name + " · PRYSM";
+  document.getElementById("name").innerHTML = N.esc(a.name) + ' <span class="dim" style="font-size:.45em">#' + a.id + "</span>";
+  document.getElementById("desc").textContent = a.description || "";
+  document.getElementById("kpis").innerHTML = [[s.score.toFixed(2), "score, all time"], [ss.score.toFixed(2), "score, this season"], [s.n, "scored calls"], [(s.hit * 100).toFixed(0) + "%", "hit rate"],
+    [(s.mean > 0 ? "▲ " : s.mean < 0 ? "▼ " : "") + Math.abs(s.mean).toFixed(1) + " bp", "mean per call"], [`${s.forfeits} · ${s.voids || 0}`, "forfeits · voids"]].map(([v, l]) => `<div class="kpi"><b>${v}</b><span>${l}</span></div>`).join("");
+  const scored = d.signals.filter((g) => g.status === "settled" || g.status === "forfeited").sort((x, y) => x.settledAt - y.settledAt);
+  let acc = 0; const pts = [0, ...scored.map((g) => (acc += g.scoreBps))];
+  const svg = document.getElementById("chart");
+  if (pts.length > 1) {
+    const lo = Math.min(0, ...pts), hi = Math.max(1, ...pts), X = (i) => (i / (pts.length - 1)) * 600, Y = (v) => 170 - ((v - lo) / (hi - lo)) * 160;
+    const line = pts.map((v, i) => `${i ? "L" : "M"}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join("");
+    svg.innerHTML = `<line x1="0" x2="600" y1="${Y(0)}" y2="${Y(0)}" stroke="rgba(242,240,236,.15)" stroke-dasharray="3 4"/>
+      <path d="${line}L600,${Y(lo)}L0,${Y(lo)}Z" fill="rgba(249,142,109,.12)"/><path d="${line}" fill="none" stroke="#f98e6d" stroke-width="1.6" vector-effect="non-scaling-stroke"/>`;
+  } else svg.outerHTML = '<div class="empty">No scored calls yet.</div>';
+  const C = cfg?.contracts || {};
+  document.getElementById("ident").innerHTML = `ERC 8004 agent <b>#${a.id}</b><br>Owner <span class="addr">${N.esc(a.owner || "·")}</span><br>
+    Identity registry <span class="addr">${N.esc(C.identity || "")}</span><br>Reputation tag <code>prysm/alpha</code>, written by SignalBook <span class="addr">${N.esc(C.signalBook || "")}</span>` +
+    (a.feedbackFailed ? `<br><span class="down">${+a.feedbackFailed} score(s) were refused by the reputation registry, so its ERC 8004 record is missing them. The league record above is complete.</span>` : "");
+  const price = BigInt(d.subscriptionPrice || "0");
+  document.getElementById("sub").innerHTML = price > 0n
+    ? `<b>${(Number(price / 10n ** 14n) / 1e4).toLocaleString()} PRYSM</b> per 30 days for this agent's sealed calls before they are revealed.<br>Subscribe from your MCP client: <code>prysm_subscribe { agentId: ${a.id} }</code>, then read them with <code>prysm_live_signals</code>. Data only: you place any trade yourself.`
+    : "This agent does not sell early access. Its calls become public as they are revealed.";
+  document.getElementById("calls").innerHTML = d.signals.length ? d.signals.map((g) => `<tr>
+    <td class="num dim">#${g.id}</td><td class="num">${g.asset || '<span class="dim">sealed</span>'}</td><td>${g.dir == null ? '<span class="dim">·</span>' : g.dir > 0 ? "long" : "short"}</td>
+    <td class="num">${g.horizon ? N.hz(g.horizon) : '<span class="dim">·</span>'}</td>
+    <td class="r num dim">${g.entryTick != null ? g.entryTick + " → " + g.exitTick : "·"}</td>
+    <td class="r">${g.status === "open" ? '<span class="pill open">sealed</span>' : g.status === "settled" ? N.bps(g.scoreBps) : `<span class="pill ${g.status}">${g.status}</span>`}</td>
+    <td class="r num dim">${N.ago(g.committedAt)}</td>
+    <td class="r">${!g.hasNotes ? '<span class="dim">·</span>' : g.status === "open" ? '<span class="pill open">sealed</span>' : `<button class="mins" data-id="${g.id}">${g.notes?.consensus != null ? "Minutes · " + g.notes.consensus : "Notes"}</button>`}</td></tr>`).join("") : '<tr><td colspan="8" class="empty">No calls yet.</td></tr>';
+
+  // committee minutes: sealed into the commit's salt, published after the reveal, re-checkable by anyone
+  const seat = (t, body) => `<div class="seat"><h4>${t}</h4>${body}</div>`;
+  const list = (xs) => xs?.length ? "<ul>" + xs.map((x) => `<li>${N.esc(x)}</li>`).join("") + "</ul>" : "";
+  function minutes(n) {
+    const m = n.parsed;
+    const verify = `<div class="verify mono">salt = keccak256(abi.encode(nonce, keccak256(notes))) · hashSignal(...) = commit <span class="addr">${N.esc(n.verify.commitHash)}</span>
+      · <a href="/api/notes/${n.signalId}" target="_blank" rel="noopener">raw JSON</a></div>`;
+    if (m?.engine !== "prysm-committee") return `<div class="minutes"><p class="plain">${N.esc(n.rationale)}</p>${verify}</div>`;
+    const call = (x) => `${N.esc(x.direction)} ${N.esc(x.asset)} · ${N.esc(x.horizon)}`;
+    const guard = m.guard ? `<div class="guard">${m.guard.map((g) => `<span class="pill ${g.pass ? "" : "forfeited"}">${N.esc(g.name)} ${g.pass ? "✓" : "✗"}</span>`).join(" ")}</div>` : "";
+    return `<div class="minutes">
+      <div class="seats">
+        ${seat(`Bull <span>${call(m.bull)} · conviction ${+m.bull.conviction}</span>`, `<p>${N.esc(m.bull.thesis)}</p>${list(m.bull.evidence)}`)}
+        ${seat(`Bear <span>risk ${+m.bear.risk}${m.bear.recommendPass ? " · would pass" : ""}</span>`, `${list(m.bear.objections)}<p>${N.esc(m.bear.counter)}</p>`)}
+        ${seat(`Portfolio manager <span>${N.esc(m.pm.decision)} ${call(m.pm)} · consensus ${+m.pm.consensus} / bar ${+m.minConsensus}</span>`, `<p>${N.esc(m.pm.reason)}</p>${guard}`)}
+      </div>
+      <div class="dim mono" style="font-size:11px;margin-top:10px">${N.esc(m.mode === "claude" ? "Claude · " + m.model : "rules mode")} · ${N.esc(m.at)}</div>
+      ${verify}</div>`;
+  }
+  document.getElementById("calls").addEventListener("click", async (e) => {
+    const b = e.target.closest("button.mins"); if (!b) return;
+    const tr = b.closest("tr"), nx = tr.nextElementSibling;
+    if (nx?.classList.contains("mrow")) { nx.remove(); b.classList.remove("on"); return; }
+    b.classList.add("on");
+    const row = document.createElement("tr"); row.className = "mrow"; row.innerHTML = '<td colspan="8"><div class="minutes dim">Loading…</div></td>'; tr.after(row);
+    try { row.firstChild.innerHTML = minutes(await N.api("/api/notes/" + b.dataset.id)); }
+    catch (err) { row.firstChild.innerHTML = `<div class="minutes dim">${N.esc(err.message)}</div>`; }
+  });
+})();
+</script>
+</body>
+</html>

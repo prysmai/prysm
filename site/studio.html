@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Martian+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png?v=2">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
+<link rel="stylesheet" href="/assets/prysm.css?v=4">
+<link rel="stylesheet" href="/assets/burns.css?v=1">
+<link rel="stylesheet" href="/assets/studio.css?v=1">
+<title>Studio · PRYSM</title>
+<meta name="description" content="PRYSM studio: the $PRYSM contract address, buyback and burn, supply burn.">
+</head>
+<body class="app studio">
+<header class="top">
+  <a class="brand" href="/"><span class="mark" aria-hidden="true"></span><span>PRYSM</span></a>
+  <nav class="nav">
+    <a href="/league">league</a>
+    <a href="/docs">Connect</a>
+    <button class="burger" type="button" aria-label="Open the menu" aria-expanded="false"><i></i><i></i><i></i><i></i></button>
+  </nav>
+</header>
+<div class="page">
+  <span class="kick">Studio</span>
+  <h1>The burn <em>desk.</em></h1>
+  <p class="lead">Owner only. Publish the $PRYSM contract address, buy back and burn on the Pons curve, burn supply the burn wallet holds, and check the public record before it goes live.</p>
+
+  <!-- key login -->
+  <div class="panel" id="login">
+    <h3><span>Studio key</span><small>stored in this tab only</small></h3>
+    <form class="st-row" id="loginf" autocomplete="off">
+      <div class="st-field"><label for="skey">Key</label><input class="st-in" id="skey" type="password" autocomplete="off" spellcheck="false" placeholder="STUDIO_KEY from server/.env"></div>
+      <button class="btn solid" id="logingo">Unlock</button>
+    </form>
+    <p class="st-msg" id="loginmsg"></p>
+  </div>
+
+  <div id="desk" hidden>
+    <div class="st-top"><span class="mono" id="upd"></span><button class="btn" type="button" id="lock">Lock studio</button></div>
+    <div class="kpis" id="kpis"></div>
+
+    <!-- CA -->
+    <div class="panel">
+      <h3><span>Contract address</span><small id="tokstate"></small></h3>
+      <p class="note" style="margin:0 0 14px">The $PRYSM token on Robinhood Chain. It must be a Pons token (the factory is checked). Once set, the landing shows the burn record and <code class="mono">/api/token</code> returns it.</p>
+      <form class="st-row" id="tokf" autocomplete="off">
+        <div class="st-field"><label for="tok">$PRYSM contract</label><input class="st-in" id="tok" spellcheck="false" placeholder="0x…"></div>
+        <button class="btn solid" id="tokgo">Save address</button>
+        <button class="btn" type="button" id="tokclear">Clear</button>
+      </form>
+      <p class="st-msg" id="tokmsg"></p>
+    </div>
+
+    <!-- burn wallet -->
+    <div class="panel">
+      <h3><span>Burn wallet</span><small>buys and burns</small></h3>
+      <div class="st-warn">Use a <b>separate, fresh wallet</b> that only holds the ETH (and $PRYSM) you plan to burn. Never paste the dev or treasury wallet. The key is encrypted on the server with PRYSM_SECRET and is only ever used to buy $PRYSM on its Pons curve with the dead address as recipient, or to send $PRYSM it holds to the dead address.</div>
+      <div class="st-kv" id="wkv"></div>
+      <form class="st-row" id="wkf" autocomplete="off">
+        <div class="st-field"><label for="wk">Burn wallet private key</label><input class="st-in" id="wk" type="password" autocomplete="new-password" spellcheck="false" placeholder="0x…"></div>
+        <button class="btn solid" id="wkgo">Save key</button>
+        <button class="btn" type="button" id="wkrm">Remove</button>
+      </form>
+      <p class="st-msg" id="wkmsg"></p>
+    </div>
+
+    <div class="grid2">
+      <!-- buyback & burn -->
+      <div class="panel">
+        <h3><span>Buyback &amp; burn</span><small id="caps"></small></h3>
+        <p class="note" style="margin:0 0 14px">Buys $PRYSM on its Pons curve with ETH from the burn wallet, the dead address as recipient. Every token bought is burned in the same transaction.</p>
+        <div class="st-amts" id="amts"><button type="button" data-v="10">$10</button><button type="button" data-v="25">$25</button><button type="button" data-v="50">$50</button><button type="button" data-v="100">$100</button></div>
+        <form class="st-row" id="bbf" autocomplete="off">
+          <div class="st-field narrow"><label for="busd">Amount in USD</label><input class="st-in" id="busd" inputmode="decimal" placeholder="e.g. 25"></div>
+          <button class="btn acc" id="bbgo">Buy back &amp; burn</button>
+        </form>
+        <p class="st-msg" id="bbmsg"></p>
+      </div>
+      <!-- supply burn -->
+      <div class="panel">
+        <h3><span>Supply burn</span><small>no buy</small></h3>
+        <p class="note" style="margin:0 0 14px">Send the $PRYSM you want to burn to the burn wallet first, then enter dollars at the curve price or press Max to burn all of it. One transfer to the dead address.</p>
+        <div class="st-kv" id="skv"></div>
+        <form class="st-row" id="sbf" autocomplete="off">
+          <div class="st-field narrow"><label for="susd">Amount in USD</label><input class="st-in" id="susd" inputmode="decimal" placeholder="e.g. 25"></div>
+          <button class="btn" type="button" id="smax">Max</button>
+          <button class="btn acc" id="sbgo">Burn supply</button>
+        </form>
+        <p class="st-msg" id="sbmsg"></p>
+      </div>
+    </div>
+
+    <!-- public record preview -->
+    <div class="panel">
+      <h3><span>Burn record preview</span><small>what the landing shows</small></h3>
+      <p class="note" style="margin:0 0 14px">The same panel as the landing, read from the chain. Leave the box empty for the published $PRYSM, or paste any Robinhood Chain token to preview its burns first.</p>
+      <form class="st-row" id="prf" autocomplete="off">
+        <div class="st-field"><label for="prt">Token (optional)</label><input class="st-in" id="prt" spellcheck="false" placeholder="0x… (empty = the published CA)"></div>
+        <button class="btn solid" id="prgo">Read burns</button>
+      </form>
+      <div id="burnpanel" style="margin-top:18px"></div>
+    </div>
+
+    <!-- history -->
+    <div class="panel">
+      <h3><span>History</span><small>this studio's runs</small></h3>
+      <div class="tbl"><table>
+        <thead><tr><th>When</th><th>Type</th><th class="r">USD</th><th class="r">ETH</th><th class="r">$PRYSM burned</th><th>Status</th><th>Transaction</th></tr></thead>
+        <tbody id="hist"><tr><td colspan="7" class="empty">No burns yet.</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+<footer class="mono">
+  <span>© 2026 PRYSM · Robinhood Chain</span>
+  <span class="ext"><a href="https://github.com/prysmagent/prysm" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a><a href="https://www.npmjs.com/package/prysm-agent" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M0 0v16h16V0zm13 13h-2.5V5.5H8V13H3V3h10z"/></svg>prysm-agent</a><a href="https://www.npmjs.com/package/prysm-mcp" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M0 0v16h16V0zm13 13h-2.5V5.5H8V13H3V3h10z"/></svg>prysm-mcp</a></span>
+  <span>Studio · owner only</span>
+</footer>
+<script src="/assets/prysm.js?v=3"></script>
+<script src="/assets/burns.js?v=1"></script>
+<script src="/assets/studio.js?v=1"></script>
+</body>
+</html>
