@@ -33,39 +33,65 @@
   };
   let i = 0, t;
   // ---------- the morph: 144 rendered frames, one loop through the four steps (36 per step) ----------
+  // between clicks the coin idles: a 120-frame full turn in its own plane, rendered in the pose of the current step
   const morph = (() => {
-    const N = 144, SEG = 36, stage = $(".stage"), frames = [], ok = new Array(N).fill(false);
+    const N = 144, SEG = 36, L = 120, stage = $(".stage");
+    const IDLE = [["a", 0], ["r", 0], ["b", 0], ["c", 0]]; // loop set and the frame that matches the step's morph frame
     const size = matchMedia("(max-width: 760px)").matches ? "m" : "d";
+    const set = (n, url) => ({ n, url, im: [], ok: new Array(n).fill(false), done: 0 });
+    const sets = { m: set(N, (f) => `/media/morph/${size}/f${f}.webp?v=1`) };
+    for (const k of "arbc") sets[k] = set(L, (f) => `/media/loop/${k}/${size}/f${f}.webp?v=2`);
+    const ready = (k) => sets[k].done === sets[k].n;
     const cv = document.createElement("canvas"); cv.className = "morph"; cv.setAttribute("aria-hidden", "true");
     art.after(cv);
     const ctx = cv.getContext("2d");
-    let at = 0, goal = 0, dir = 1, raf = 0, last = 0;
-    const draw = () => { if (ok[at]) ctx.drawImage(frames[at], 0, 0, cv.width, cv.height); };
+    // mode: "morph" walks the 144 frames to goal; "spin" turns the idle loop fast to its aligned frame; "idle" turns slowly
+    let mode = "morph", at = 0, goal = 0, dir = 1, step = 0, lf = 0, pend = null, raf = 0, last = 0, seen = true;
+    const cur = () => (mode === "morph" ? [sets.m, at] : [sets[IDLE[step][0]], lf]);
+    const draw = () => { const [s, f] = cur(); if (s.ok[f]) ctx.drawImage(s.im[f], 0, 0, cv.width, cv.height); };
     const fit = () => { const r = cv.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2); cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d); draw(); };
+    const idle = () => { mode = "idle"; lf = IDLE[step][1]; stage.classList.add("live"); draw(); kick(); };
+    const canIdle = () => !still && ready("m") && ready(IDLE[step][0]);
     const tick = (t) => {
-      if (at === goal) { raf = 0; return; }
-      if (t - last >= 1000 / 36) { last = t; at = (at + dir + N) % N; draw(); }
-      raf = requestAnimationFrame(tick);
+      raf = 0;
+      if (mode === "morph") {
+        if (at === goal) { if (canIdle()) idle(); return; }
+        if (t - last >= 1000 / 36) { last = t; at = (at + dir + N) % N; draw(); }
+      } else if (mode === "spin") {
+        const aim = IDLE[step][1], dist = (aim - lf + L) % L, d = dist <= L / 2 ? dist : dist - L;
+        if (!d) { mode = "morph"; at = step * SEG; ({ goal, dir } = pend); step = pend.step; last = t; draw(); }
+        else { lf = (lf + Math.sign(d) * Math.min(Math.abs(d), 5) + L) % L; draw(); }
+      } else {
+        if (!seen) return;
+        if (t - last >= 1000 / 20) { last = t; lf = (lf + 1) % L; draw(); }
+      }
+      kick();
     };
-    const load = () => {
-      if (navigator.connection && navigator.connection.saveData) return;
-      let k = 0;
+    const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    // loads one set, four images at a time, then calls done
+    const load = (k, done) => {
+      const s = sets[k]; let q = 0;
       const next = () => {
-        if (k >= N) return;
-        const f = k++, im = new Image();
-        im.decoding = "async"; im.onload = () => { ok[f] = true; if (f === at) draw(); next(); }; im.onerror = next;
-        im.src = `/media/morph/${size}/f${String(f).padStart(3, "0")}.webp?v=1`; frames[f] = im;
+        if (q >= s.n) return;
+        const f = q++, im = new Image();
+        const fin = (good) => { s.ok[f] = good; if (++s.done === s.n) done(); else next(); if (good) draw(); };
+        im.decoding = "async"; im.onload = () => fin(true); im.onerror = () => fin(false);
+        im.src = s.url(String(f).padStart(3, "0")); s.im[f] = im;
       };
       for (let j = 0; j < 4; j++) next();
     };
+    const chain = (ks) => { if (!ks.length) return; load(ks[0], () => { if (mode === "morph" && at === goal && canIdle()) idle(); chain(ks.slice(1)); }); };
     fit(); addEventListener("resize", fit);
-    addEventListener("load", () => setTimeout(load, 500));
-    // false until every frame is in; the hero then falls back to the flash
-    return (step, d) => {
-      if (!ok.every(Boolean)) return false;
-      goal = step * SEG; dir = d; stage.classList.add("live");
-      if (still) { at = goal; draw(); return true; }
-      if (!raf) { last = 0; raf = requestAnimationFrame(tick); }
+    addEventListener("load", () => setTimeout(() => { if (!(navigator.connection && navigator.connection.saveData)) chain(still ? ["m"] : ["m", "a", "r", "b", "c"]); }, 500));
+    // the idle turn pauses while the hero is off screen
+    new IntersectionObserver(([e]) => { seen = e.isIntersecting; if (seen && mode === "idle") kick(); }).observe(stage);
+    // false until the morph frames are in; the hero then falls back to the flash
+    return (n, d) => {
+      if (!ready("m") || sets.m.ok.includes(false)) return false;
+      stage.classList.add("live");
+      if (still) { mode = "morph"; step = n; at = goal = n * SEG; draw(); return true; }
+      if (mode === "idle" || mode === "spin") { mode = "spin"; pend = { goal: n * SEG, dir: d, step: n }; kick(); return true; }
+      goal = n * SEG; dir = d; step = n; kick();
       return true;
     };
   })();

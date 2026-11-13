@@ -10,7 +10,7 @@ import readline from "node:readline/promises";
 import { ethers } from "ethers";
 import { createPrysm, guardFromEnv, DEFAULT_API, HORIZON, TWAP, WINDOW } from "../lib/core.mjs";
 
-const VERSION = "0.1.0";
+const VERSION = "0.1.1";
 const HOME = process.env.PRYSM_HOME || path.join(os.homedir(), ".prysm");
 const CONFIG = path.join(HOME, "config.json"), KEYSTORE = path.join(HOME, "keystore.json");
 

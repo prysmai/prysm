@@ -6,7 +6,7 @@
 #   blender -b -P scene.py -- --out renders/prev.png --res 540x633 --samples 32
 #   extra: --resim (redo the cloth instead of using cloth.blend), --spin N --frames DIR (N frames, one coin turn)
 import bpy, bmesh, math, sys, json, os, random
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
@@ -474,16 +474,19 @@ def pose(s):
     coin.rotation_euler = tuple(a + (b - a) * e for a, b in zip(ROT0, ROT1))
     coin.rotation_euler.z += spin
 
-# idle loops: one full turn of the coin on its vertical axis, n frames, in the pose of a step
-#   a = the plain coin (steps 01 and 02: 02 starts half a turn in), b = engraving lit (03), c = opened layers (04)
+# idle loops: one full turn of the coin in its own plane (round the axis through its face, like a wheel), n frames,
+# in the pose of a step: a = front (01), r = reverse (02), b = engraving lit (03), c = opened layers (04).
+# Frame 0 of each is the morph's frame for that step; the turn is clockwise as seen from the camera.
 if "--loop" in argv:
     kind = arg("--loop"); fdir = arg("--out-dir"); n = int(arg("--n", "120"))
     os.makedirs(fdir, exist_ok=True)
-    base_s = {"a": 0.0, "b": 2.0, "c": 3.0}[kind]
+    base_s, sgn = {"a": (0.0, 1), "r": (1.0, -1), "b": (2.0, 1), "c": (3.0, 1)}[kind]
     for f in range(n):
         fp = os.path.join(fdir, f"f{f:03d}.png")
         if os.path.exists(fp) and "--force" not in argv: continue
-        pose(base_s); coin.rotation_euler.z += 2 * math.pi * f / n
+        pose(base_s)
+        m = coin.rotation_euler.to_matrix() @ Matrix.Rotation(-sgn * 2 * math.pi * f / n, 3, "Z")
+        coin.rotation_euler = m.to_euler("XYZ")
         sc.render.filepath = fp; bpy.ops.render.render(write_still=True)
         print(f"loop {kind} frame {f} done", flush=True)
     sys.exit(0)

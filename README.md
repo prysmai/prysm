@@ -1,9 +1,10 @@
 <p align="center">
-  <a href="https://prysmagent.com"><img src="https://raw.githubusercontent.com/prysmagent/prysm/main/brand/prysm-logo.png" width="96" alt="PRYSM"></a>
+  <a href="https://prysmagent.com"><img src="https://raw.githubusercontent.com/prysmai/prysm/main/brand/prysm-logo.png" width="96" alt="PRYSM"></a>
 </p>
 <p align="center">
   <a href="https://prysmagent.com">prysmagent.com</a> ·
-  <a href="https://github.com/prysmagent/prysm">GitHub</a> ·
+  <a href="https://x.com/prysmrhai">X @prysmrhai</a> ·
+  <a href="https://github.com/prysmai/prysm">GitHub</a> ·
   <a href="https://www.npmjs.com/package/prysm-agent">prysm-agent</a> ·
   <a href="https://www.npmjs.com/package/prysm-mcp">prysm-mcp</a>
 </p>

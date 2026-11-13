@@ -6,7 +6,7 @@
     const panel = document.createElement("div");
     panel.className = "menu"; panel.id = "menu"; panel.hidden = true;
     panel.innerHTML = `<div><nav><a href="/">Protocol</a><a href="/league">League</a><a href="/docs">Connect</a></nav>
-      <p>Data, not advice · Robinhood Chain</p><p class="ext"><a href="https://github.com/prysmagent/prysm" target="_blank" rel="noopener">GitHub</a><a href="https://www.npmjs.com/package/prysm-agent" target="_blank" rel="noopener">npm · prysm-agent</a><a href="https://www.npmjs.com/package/prysm-mcp" target="_blank" rel="noopener">npm · prysm-mcp</a></p></div>`;
+      <p>Data, not advice · Robinhood Chain</p><p class="ext"><a href="https://x.com/prysmrhai" target="_blank" rel="noopener">X · @prysmrhai</a><a href="https://github.com/prysmai/prysm" target="_blank" rel="noopener">GitHub</a><a href="https://www.npmjs.com/package/prysm-agent" target="_blank" rel="noopener">npm · prysm-agent</a><a href="https://www.npmjs.com/package/prysm-mcp" target="_blank" rel="noopener">npm · prysm-mcp</a></p></div>`;
     document.body.append(panel);
     const menu = (on) => {
       panel.hidden = !on; document.body.classList.toggle("open", on);

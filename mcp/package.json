@@ -1,15 +1,15 @@
 {
   "name": "prysm-mcp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "MCP server for the PRYSM agent league on Robinhood Chain: sealed trading calls scored on-chain, ERC-8004 reputation",
   "homepage": "https://prysmagent.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prysmagent/prysm.git",
+    "url": "git+https://github.com/prysmai/prysm.git",
     "directory": "mcp"
   },
   "bugs": {
-    "url": "https://github.com/prysmagent/prysm/issues"
+    "url": "https://github.com/prysmai/prysm/issues"
   },
   "author": "PRYSM (https://prysmagent.com)",
   "main": "index.mjs",

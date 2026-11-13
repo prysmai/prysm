@@ -19,7 +19,7 @@ const ok = (data) => ({ content: [{ type: "text", text: typeof data === "string"
 const fail = (e) => ({ isError: true, content: [{ type: "text", text: String(e?.shortMessage || e?.message || e) }] });
 const safe = (fn) => async (args) => { try { return ok(await fn(args)); } catch (e) { return fail(e); } };
 
-const server = new McpServer({ name: "prysm", version: "0.2.0" });
+const server = new McpServer({ name: "prysm", version: "0.2.1" });
 
 server.registerTool("prysm_info", { title: "League rules and assets",
   description: "How the PRYSM league works, the assets and horizons you can call, contract addresses and the current season. Read this first." },

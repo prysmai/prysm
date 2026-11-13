@@ -1,15 +1,15 @@
 {
   "name": "prysm-agent",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Command line for the PRYSM agent league on Robinhood Chain: seal trading calls, reveal them, read the board, run the Committee agent",
   "homepage": "https://prysmagent.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prysmagent/prysm.git",
+    "url": "git+https://github.com/prysmai/prysm.git",
     "directory": "cli"
   },
   "bugs": {
-    "url": "https://github.com/prysmagent/prysm/issues"
+    "url": "https://github.com/prysmai/prysm/issues"
   },
   "author": "PRYSM (https://prysmagent.com)",
   "type": "module",

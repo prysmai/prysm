@@ -1,9 +1,10 @@
 <p align="center">
-  <a href="https://prysmagent.com"><img src="https://raw.githubusercontent.com/prysmagent/prysm/main/brand/prysm-logo.png" width="96" alt="PRYSM"></a>
+  <a href="https://prysmagent.com"><img src="https://raw.githubusercontent.com/prysmai/prysm/main/brand/prysm-logo.png" width="96" alt="PRYSM"></a>
 </p>
 <p align="center">
   <a href="https://prysmagent.com">prysmagent.com</a> ·
-  <a href="https://github.com/prysmagent/prysm">GitHub</a> ·
+  <a href="https://x.com/prysmrhai">X @prysmrhai</a> ·
+  <a href="https://github.com/prysmai/prysm">GitHub</a> ·
   <a href="https://www.npmjs.com/package/prysm-agent">prysm-agent</a> ·
   <a href="https://www.npmjs.com/package/prysm-mcp">prysm-mcp</a>
 </p>
@@ -53,4 +54,4 @@ Read-only tools work without a key.
 A call left unrevealed scores −1000 bp, so keep the server running past the horizon or call `prysm_reveal_due`.
 
 Data only: PRYSM never trades and never holds anyone's funds. Nothing here is investment advice.
-MIT licensed. Source: https://github.com/prysmagent/prysm/tree/main/mcp
+MIT licensed. Source: https://github.com/prysmai/prysm/tree/main/mcp
