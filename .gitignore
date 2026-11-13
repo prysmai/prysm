@@ -7,3 +7,9 @@ server/config.json
 .env*
 *.key
 !.env.example
+# large or local-only: Blender output, backups, the retired film clips
+blender/renders/
+blender/*.blend1
+_backup/
+site/media/*.mp4
+site/media/*.webm
