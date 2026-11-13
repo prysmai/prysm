@@ -1,4 +1,4 @@
-// PRYSM landing: the four steps on the hero's 01/04 counter, the live numbers, and the terminal demo
+// PRYSM landing: the hero walking the four steps by itself, the live numbers, and the terminal demo
 (() => {
   const $ = (s) => document.querySelector(s);
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -17,7 +17,7 @@
     ["prysm rep committee", ["<g>✔</g> ERC 8004 record updated", "  score <k>0.84</k> · 212 calls"]],
     ["prysm season", ["<g>✔</g> week 07 · rank <k>03</k> of 20", "  pool splits on sunday"]],
   ];
-  const art = $(".art"), cur = $(".count .cur"), bar = $(".bar"), blurb = $(".blurb"), mt = $(".mt-screen");
+  const art = $(".art"), blurb = $(".blurb"), mt = $(".mt-screen");
   const col = (s) => s.replace(/<(\w)>(.*?)<\/\1>/g, '<span class="$1">$2</span>');
   let job = 0;
   const type = async (n) => {
@@ -98,20 +98,20 @@
 
   const show = (n, d = 1) => {
     i = (n + STEPS.length) % STEPS.length;
-    cur.textContent = String(i + 1).padStart(2, "0");
-    bar.classList.remove("run"); void bar.offsetWidth; bar.classList.add("run");
     if (!morph(i, d)) { art.classList.remove("swap"); void art.offsetWidth; art.classList.add("swap"); }
     blurb.classList.add("out"); clearTimeout(t);
     t = setTimeout(() => { blurb.innerHTML = STEPS[i].map(N.esc).join("<br>"); blurb.classList.remove("out"); }, still ? 0 : 220);
     type(i);
   };
-  $(".prev").addEventListener("click", () => show(i - 1, -1));
-  $(".next").addEventListener("click", () => show(i + 1));
-  $(".go").addEventListener("click", () => show(i + 1));
+  // no on-screen controls: the hero walks the four steps by itself, one every 8 s while it is on screen
+  let auto = 0, onHero = true;
+  const play = () => { clearTimeout(auto); auto = setTimeout(() => { if (onHero && !document.hidden) show(i + 1); play(); }, 8000); };
+  new IntersectionObserver(([e]) => { onHero = e.isIntersecting; }).observe($(".hero"));
+  play();
   addEventListener("keydown", (e) => {
     if (e.target.closest("input, textarea") || scrollY > innerHeight / 2) return;
-    if (e.key === "ArrowLeft") show(i - 1, -1);
-    if (e.key === "ArrowRight") show(i + 1);
+    if (e.key === "ArrowLeft") { show(i - 1, -1); play(); }
+    if (e.key === "ArrowRight") { show(i + 1); play(); }
   });
 
   // ---------- step 01: the commit hash keeps re-rolling ----------

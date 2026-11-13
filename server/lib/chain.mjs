@@ -16,7 +16,9 @@ export function loadConfig() {
   if (process.env.PORT) cfg.port = +process.env.PORT;
   if (process.env.SEASON_EPOCH) cfg.seasonEpoch = process.env.SEASON_EPOCH;
   if (process.env.KEEPER_INTERVAL) cfg.keeperIntervalSec = +process.env.KEEPER_INTERVAL;
-  cfg.dep = JSON.parse(fs.readFileSync(path.resolve(ROOT, cfg.deployment)));
+  // no deployment file yet (the league contracts are not on mainnet): the server runs the studio and the burn record only
+  const dep = path.resolve(ROOT, cfg.deployment);
+  cfg.dep = fs.existsSync(dep) ? JSON.parse(fs.readFileSync(dep)) : null;
   return cfg;
 }
 

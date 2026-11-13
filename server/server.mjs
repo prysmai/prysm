@@ -1,4 +1,5 @@
 // PRYSM server: indexes the SignalBook, serves the league API and the site, relays sealed signals, runs the reveal keeper.
+// Before the league contracts are deployed (no deployment file) it runs the studio, /api/token and /api/burns only.
 // env: RPC, DEPLOYMENT, PORT, PRYSM_CONFIG, KEEPER_KEY (optional: a funded hot wallet that only ever calls reveal)
 // studio env (server/.env): STUDIO_KEY, PRYSM_SECRET (both generated when missing), RPC_URL, BURN_MAX_USD, BURN_DAY_USD
 import "./lib/env.mjs";
@@ -16,10 +17,10 @@ import { createBurn } from "./lib/burn.mjs";
 import { createBurns } from "./lib/burns.mjs";
 import * as P from "./lib/pons.mjs";
 
-const cfg = loadConfig(), chain = connect(cfg), DATA = process.env.PRYSM_DATA ? path.resolve(process.env.PRYSM_DATA) : path.join(ROOT, "data");
+const cfg = loadConfig(), LEAGUE = !!cfg.dep, chain = LEAGUE ? connect(cfg) : null, DATA = process.env.PRYSM_DATA ? path.resolve(process.env.PRYSM_DATA) : path.join(ROOT, "data");
 fs.mkdirSync(path.join(DATA, "seasons"), { recursive: true });
-const idx = new Indexer(chain, cfg, DATA), relay = new Relay(chain, cfg, DATA), notes = new Notes(chain, cfg, DATA);
-const keeper = process.env.KEEPER_KEY ? new ethers.Wallet(process.env.KEEPER_KEY, chain.provider) : null;
+const idx = LEAGUE && new Indexer(chain, cfg, DATA), relay = LEAGUE && new Relay(chain, cfg, DATA), notes = LEAGUE && new Notes(chain, cfg, DATA);
+const keeper = LEAGUE && process.env.KEEPER_KEY ? new ethers.Wallet(process.env.KEEPER_KEY, chain.provider) : null;
 const epochMs = Date.parse(cfg.seasonEpoch), days = cfg.seasonDays, SITE = path.resolve(ROOT, cfg.site);
 // the oracle pools as the SignalBook actually has them (the source of truth, not the shared list)
 let BOOK_ASSETS = ASSETS.map(({ id, sym, pool, invert }) => ({ id, sym, pool, invert }));
@@ -52,8 +53,10 @@ function serveStatic(req, res, p) {
 }
 
 const body = (req) => new Promise((ok, no) => { let s = ""; req.on("data", (c) => { s += c; if (s.length > 40000) req.destroy(); }); req.on("end", () => { try { ok(JSON.parse(s || "{}")); } catch (e) { no(e); } }); });
+// behind nginx every request comes from loopback: trust its X-Real-IP only then
+const ip = (req) => { const a = req.socket.remoteAddress || ""; return /^(::ffff:)?127\.0\.0\.1$|^::1$/.test(a) && req.headers["x-real-ip"] ? String(req.headers["x-real-ip"]) : a; };
 const hits = new Map();
-const limited = (req, n = 60) => { const k = req.socket.remoteAddress, now = Date.now(), h = (hits.get(k) || []).filter((t) => now - t < 60000); h.push(now); hits.set(k, h); return h.length > n; };
+const limited = (req, n = 60) => { const k = ip(req), now = Date.now(), h = (hits.get(k) || []).filter((t) => now - t < 60000); h.push(now); hits.set(k, h); return h.length > n; };
 
 // sealed notes stay sealed while the call is open; afterwards the list shows a one-line summary (full text at /api/notes/:id)
 function publicSignal(s) {
@@ -103,7 +106,7 @@ async function tokenApi(req, res, p, url) {
   const q = String(url.searchParams.get("token") || "").trim(), t = q || settings.data.token;
   if (!t) return json(res, 200, { token: null, items: [], count: 0 });
   if (!P.isAddr(t)) return json(res, 400, { error: "That is not a contract address." });
-  if (q) { const k = req.socket.remoteAddress, a = (burnHits.get(k) || []).filter((x) => Date.now() - x < 60_000); if (a.length >= 6) return json(res, 429, { error: "Six checks a minute." }); burnHits.set(k, [...a, Date.now()]); }
+  if (q) { const k = ip(req), a = (burnHits.get(k) || []).filter((x) => Date.now() - x < 60_000); if (a.length >= 6) return json(res, 429, { error: "Six checks a minute." }); burnHits.set(k, [...a, Date.now()]); }
   try {
     const v = await Promise.race([burns.get(t), new Promise((r) => setTimeout(() => r(null), 25_000))]);
     return json(res, 200, v || { token: t.toLowerCase(), scanning: true, items: [], count: 0, note: "Reading the chain from the launch block. This takes a minute the first time." });
@@ -114,6 +117,7 @@ async function api(req, res, url) {
   const p = url.pathname;
   if (p.startsWith("/api/studio/")) return studioApi(req, res, p);
   if (p === "/api/token" || p === "/api/burns") return tokenApi(req, res, p, url);
+  if (!LEAGUE) return json(res, 503, { error: "The league opens at launch.", league: false });
   const sigs = idx.signals(), agents = idx.state.agents;
   if (p === "/api/config") return json(res, 200, { chainId: cfg.dep.chainId, rpc: cfg.rpc, contracts: { signalBook: cfg.dep.signalBook, league: cfg.dep.league, subscriptions: cfg.dep.subscriptions, identity: cfg.dep.identity, reputation: cfg.dep.reputation, token: cfg.dep.token },
     assets: BOOK_ASSETS, horizons: [900, 3600, 14400], season: { current: currentSeason(), epoch: cfg.seasonEpoch, days }, minSignals: cfg.minSignals, keeper: !!keeper });
@@ -193,5 +197,8 @@ async function loop() {
   }
 }
 
-await loadBookAssets().catch((e) => log("could not read assets from the SignalBook:", e.shortMessage || e.message));
-srv.listen(cfg.port, () => { log(`PRYSM on :${cfg.port} · chain ${cfg.dep.chainId} · book ${cfg.dep.signalBook} · keeper ${keeper ? keeper.address : "off"}`); loop(); });
+if (LEAGUE) await loadBookAssets().catch((e) => log("could not read assets from the SignalBook:", e.shortMessage || e.message));
+srv.listen(cfg.port, () => {
+  if (!LEAGUE) return log(`PRYSM on :${cfg.port} · studio and burn record only (no deployment file at ${cfg.deployment}: the league opens at launch)`);
+  log(`PRYSM on :${cfg.port} · chain ${cfg.dep.chainId} · book ${cfg.dep.signalBook} · keeper ${keeper ? keeper.address : "off"}`); loop();
+});

@@ -31,14 +31,6 @@
 .scroll svg path { animation: nudge 2.4s ease-in-out infinite; }
 
 /* ---------- furniture ---------- */
-.tick { width: calc(1.2 * var(--u)); height: calc(15 * var(--u)); background: #6c6a6e; }
-.tick-l { left: calc(39 / 635 * 100vw); top: calc(89 / 422 * 100vh); }
-.tick-r { left: calc(580 / 635 * 100vw); top: calc(220 / 422 * 100vh); }
-.arrow { top: calc(172 / 422 * 100vh); transform: translateY(-50%); width: calc(14 * var(--u)); padding: calc(4 * var(--u)) 0; }
-.arrow svg { fill: none; stroke: var(--fg); stroke-width: 1.5; transition: transform .25s; }
-.arrow:hover svg { stroke: var(--acc); }
-.prev { left: calc(42 / 635 * 100vw); } .next { left: calc(580 / 635 * 100vw); }
-.prev:hover svg { transform: translateX(-3px); } .next:hover svg { transform: translateX(3px); }
 
 /* ---------- copy ---------- */
 .lede { left: calc(40 / 635 * 100vw); top: calc(243 / 422 * 100vh); font-size: calc(9.3 * var(--u)); line-height: calc(12.8 * var(--u)); }
@@ -46,13 +38,6 @@
 .title svg { width: 100%; overflow: visible; }
 .side { left: calc(477 / 635 * 100vw); top: calc(272 / 422 * 100vh); height: calc(150 / 422 * 100vh); width: calc(130 * var(--u)); }
 .side > * { position: absolute; left: 0; }
-.count { top: 0; display: flex; align-items: center; font: 600 calc(8 * var(--u)) / 1 var(--sans); }
-.bar { width: calc(35 * var(--u)); height: calc(1.3 * var(--u)); margin: 0 calc(10 * var(--u)); background: rgba(255, 255, 255, .22); overflow: hidden; }
-.bar i { display: block; height: 100%; background: var(--fg); transform-origin: left; }
-.bar.run i { animation: fill .9s cubic-bezier(.3, .7, .2, 1) both; }
-.go { top: calc(28 * var(--u)); width: calc(28 * var(--u)); }
-.go svg { fill: none; stroke: var(--acc); stroke-width: 2.4; stroke-linecap: round; transition: transform .3s; }
-.go:hover svg { transform: translateX(4px); }
 .blurb { top: calc(64 * var(--u)); font-size: calc(6.4 * var(--u)); line-height: calc(9 * var(--u)); white-space: nowrap; transition: opacity .3s, transform .3s; }
 .blurb.out { opacity: 0; transform: translateY(4px); }
 /* the mini terminal that types the CLI for each step */
@@ -67,16 +52,13 @@
 .upcoming svg { width: calc(8 * var(--u)); fill: currentColor; }
 .upcoming:hover { color: var(--acc); }
 
-.hero .top, .lede, .title, .side, .arrow, .tick { animation: fade 1s .35s both; }
+.hero .top, .lede, .title, .side { animation: fade 1s .35s both; }
 .title { animation-delay: .5s; }
 .art.swap { animation: swap .7s both; }
 @keyframes rise { from { opacity: 0; transform: translateY(2%) scale(1.02); } }
 @keyframes fade { from { opacity: 0; transform: translateY(8px); } }
 @keyframes swap { 0% { opacity: .15; filter: brightness(1.6); } }
 @keyframes nudge { 50% { transform: translateY(1.2px); } }
-@keyframes fill { from { transform: scaleX(0); } }
-/* .arrow and .top are centred with a transform, so their fade keeps it */
-.arrow { animation-name: fade-y; }
 @keyframes fade-y { from { opacity: 0; transform: translateY(calc(-50% + 8px)); } }
 
 /* ---------- how it works ---------- */
@@ -155,7 +137,7 @@
   .stage { position: relative; left: 50%; transform: translateX(-50%); width: 112vw; height: calc(112vw * 422 / 360); margin-top: 40px; }
   .art { -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent), linear-gradient(transparent 55%, #000 85%); -webkit-mask-composite: source-out; mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent), linear-gradient(#000 60%, transparent 96%); mask-composite: intersect; }
   .morph { -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent), linear-gradient(transparent 55%, #000 85%); -webkit-mask-composite: source-out; mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent), linear-gradient(#000 60%, transparent 96%); mask-composite: intersect; }
-  .scroll, .tick, .arrow { display: none; }
+  .scroll { display: none; }
   .lede { margin: -32vw 16px 0; font-size: 14px; line-height: 1.3; }
   .title { margin: 18px 16px 0; width: calc(100vw - 80px); max-width: 360px; }
   .side { margin: 28px 16px 0; height: auto; width: auto; display: grid; justify-items: start; gap: 18px; }

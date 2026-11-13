@@ -9,7 +9,9 @@ import { leaderboard, payouts, seasonOf } from "./lib/score.mjs";
 import { leaf, build } from "./lib/merkle.mjs";
 
 const [cmd, sArg, poolArg] = process.argv.slice(2), season = +sArg;
-const cfg = loadConfig(), chain = connect(cfg), DATA = path.join(ROOT, "data"), f = path.join(DATA, "seasons", `${season}.json`);
+const cfg = loadConfig();
+if (!cfg.dep) { console.error(`no deployment file at ${cfg.deployment}: deploy the league contracts first`); process.exit(1); }
+const chain = connect(cfg), DATA = path.join(ROOT, "data"), f = path.join(DATA, "seasons", `${season}.json`);
 fs.mkdirSync(path.dirname(f), { recursive: true });
 const epochMs = Date.parse(cfg.seasonEpoch), days = cfg.seasonDays;
 
